@@ -24,6 +24,12 @@ Example of use of dynamic Blur combined with postprocess
 
 ![pie menu](pieMenu.gif)
 
+Box Blur 
+-------------
+Simplified Blur without Gaussian distribution curve
+
+![pie menu](boxBlur.gif)
+
 
 Limitations and problems
 -------------
@@ -33,5 +39,6 @@ Limitations and problems
 - Need some optymalization for mobile
 
 -------------
-Based on "Intruduction to 3D Game Programming With DirectX 11" by Frank D. Luna
+Based on "Introduction to 3D Game Programming With DirectX 11" by Frank D. Luna
+-------------
 AWP rifle by RGI https://www.youtube.com/channel/UCqpUhXDO7-6oE6-OLRQojng
