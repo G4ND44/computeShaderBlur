@@ -9,17 +9,17 @@ Works only for devices supporting compute shaders.
 Static Blur 
 -------------
 Blur with kernel caculated on start
-![static blur](https://i.imgur.com/jOaxsJQ.mp4)
+![static blur](https://media.giphy.com/media/hUAKulibVQiFKdpxpL/giphy.gif)
 
 Dynamic Blur 
 -------------
 Blur with kernel caculation on gpu in realtime
-![dynamic blur](https://imgur.com/ONTiorG.gif)
+![dynamic blur](https://media.giphy.com/media/h7uBOaSrk5Pxlm89ja/giphy.gif)
 
 Pie Menu 
 -------------
 Example of use of dynamic Blur combined with postprocess
-![pie menu](https://imgur.com/u6kSDC1.gif)
+![pie menu](https://media.giphy.com/media/U6jmdraF2YbtWJEsqx/giphy.gif)
 
 
 Limitations and problems
@@ -31,4 +31,4 @@ Limitations and problems
 
 -------------
 Based on "Intruduction to 3D Game Programming With DirectX 11" by Frank D. Luna
-AWP rifle by RGI ![RGI ](https://www.youtube.com/channel/UCqpUhXDO7-6oE6-OLRQojng)
+AWP rifle by RGI https://www.youtube.com/channel/UCqpUhXDO7-6oE6-OLRQojng
