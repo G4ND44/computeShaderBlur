@@ -1,0 +1,131 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel HorzBlurCs
+#pragma kernel VertBlurCs
+#pragma kernel SumsDeleteCS
+#pragma kernel WeightCaculatorCs
+#pragma kernel WeightNormalizerCs
+#include "blurCommon.compute"
+
+#define maxRadius 92 // cant be larger then N/2
+#define uintAndFloatRange 2147483647
+
+Texture2D<float4> source;
+RWTexture2D<float4> verBlurOutput;
+shared RWTexture2D<float4> horBlurOutput;
+shared RWStructuredBuffer<unorm float> gWeights;
+RWStructuredBuffer<uint> weightsSum;
+
+#define CacheSize (threadCount + 2*maxRadius)
+groupshared float4 gCache[CacheSize];
+
+
+cbuffer onValidate
+{
+    int blurRadius;
+    float sigma;
+}
+ 
+[numthreads(1, 1, 1)]
+void SumsDeleteCS()
+{
+    weightsSum[0] = 0;
+}
+
+
+[numthreads(1, 1, 1)]
+void WeightCaculatorCs(uint3 dispatchThreadId : SV_DispatchThreadID)
+{
+    float newBlurWalue = 0.39894 * exp(-0.5 * float(dispatchThreadId.x) * float(dispatchThreadId.x) / (sigma * sigma)) / sigma;
+    uint kSize = (uint) blurRadius;
+    
+    if (dispatchThreadId.x!=0)
+    {
+        gWeights[kSize + dispatchThreadId.x] = newBlurWalue;
+        gWeights[kSize - dispatchThreadId.x] = newBlurWalue;
+       
+        InterlockedAdd(weightsSum[0], (uint) (newBlurWalue * 2 * uintAndFloatRange));
+    }     
+    else
+    {
+        gWeights[kSize] = newBlurWalue;
+        InterlockedAdd(weightsSum[0], (uint) (newBlurWalue * uintAndFloatRange));
+    }
+}
+
+[numthreads(1, 1, 1)]
+void WeightNormalizerCs(uint3 dispatchThreadId : SV_DispatchThreadID)
+{
+    float floatSum = ((float) weightsSum[0]) / uintAndFloatRange;
+    gWeights[dispatchThreadId.x] /= floatSum;
+}
+
+[numthreads(threadCount, 1, 1)]
+void HorzBlurCs(uint3 groupThreadID : SV_GroupThreadID, uint3 dispatchThreadId : SV_DispatchThreadID)
+{
+    int clamedDisX = min(dispatchThreadId.x, source.Length.x - 1);
+    int clamedDisY = min(dispatchThreadId.y, source.Length.y - 1);
+    uint bRadius = (uint) blurRadius;
+    if (groupThreadID.x < bRadius)
+    {
+        int x = max(clamedDisX - blurRadius, 0);
+        uint2 clampedPos = uint2(x, clamedDisY);
+        gCache[groupThreadID.x] = source[clampedPos];
+
+    }
+    else if (groupThreadID.x >= threadCount - bRadius) // 2 zakres
+    {
+        int x = min(clamedDisX + blurRadius, source.Length.x - 1);
+        uint2 clampedPos = uint2(x, clamedDisY);
+        gCache[groupThreadID.x + 2 * blurRadius] = source[clampedPos];
+
+    }
+
+    uint2 clampedPos = uint2(clamedDisX, clamedDisY);
+    gCache[groupThreadID.x + blurRadius] = source[clampedPos];
+
+    GroupMemoryBarrierWithGroupSync();
+    float4 blurColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+    [unroll(2*maxRadius)]
+    for (int i = -blurRadius; i <= blurRadius; i++)
+    {
+        int k = groupThreadID.x + blurRadius + i;
+        blurColor += gCache[k] * gWeights[i + blurRadius];
+
+    }
+    horBlurOutput[uint2(dispatchThreadId.x, dispatchThreadId.y)] = blurColor;
+
+}
+
+[numthreads(1, threadCount, 1)]
+void VertBlurCs(uint3 groupThreadID : SV_GroupThreadID, uint3 dispatchThreadId : SV_DispatchThreadID)
+{
+    int clamedDisX = min(max(dispatchThreadId.x, 0), horBlurOutput.Length.x - 1);
+    int clamedDisY = min(max(dispatchThreadId.y, 0), horBlurOutput.Length.y - 1);
+    uint bRadius = (uint) blurRadius;
+    if (groupThreadID.y < bRadius)
+    {
+        int y = max(clamedDisY - blurRadius, 0);
+        uint2 clampedPos = uint2(clamedDisX, y);
+        gCache[groupThreadID.y] = horBlurOutput.Load(clampedPos);
+    }
+    else if (groupThreadID.y >= threadCount - bRadius)
+    {
+        int y = min(clamedDisY + blurRadius, horBlurOutput.Length.y - 1);
+        uint2 clampedPos = uint2(clamedDisX, y);
+        gCache[groupThreadID.y + 2 * blurRadius] = horBlurOutput.Load(clampedPos);
+
+    }
+    gCache[groupThreadID.y + blurRadius] = horBlurOutput.Load(uint2(clamedDisX, clamedDisY));
+
+    GroupMemoryBarrierWithGroupSync();
+    float4 blurColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+    [unroll(2*maxRadius)]
+    for (int i = -blurRadius; i <= blurRadius; i++)
+    {
+        int k = groupThreadID.y + blurRadius + i;
+        blurColor += gCache[k] * gWeights[i + blurRadius];
+    }
+    verBlurOutput[uint2(dispatchThreadId.x, dispatchThreadId.y)] = blurColor;
+}
