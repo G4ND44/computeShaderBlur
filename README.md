@@ -9,7 +9,7 @@ Works only for devices supporting compute shaders.
 Static Blur 
 -------------
 Blur with kernel caculated on start
-![static blur](https://imgur.com/a/HYwI1Vr.gif)
+![static blur](https://i.imgur.com/jOaxsJQ.mp4)
 
 Dynamic Blur 
 -------------
