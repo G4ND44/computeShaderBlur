@@ -4,22 +4,25 @@ Compute Shader Blur for Unity
 Optimized blur for Unity using compute shaders with some examples.
 Works only for devices supporting compute shaders.
 
-![preview](https://i.imgur.com/C7tJDHD.png)
+![preview](preview.png)
 
 Static Blur 
 -------------
 Blur with kernel caculated on start
-![static blur](https://media.giphy.com/media/hUAKulibVQiFKdpxpL/giphy.gif)
+
+![static blur](staticBlur.gif)
 
 Dynamic Blur 
 -------------
 Blur with kernel caculation on gpu in realtime
-![dynamic blur](https://media.giphy.com/media/h7uBOaSrk5Pxlm89ja/giphy.gif)
+
+![dynamic blur](dynamicBlur.gif)
 
 Pie Menu 
 -------------
 Example of use of dynamic Blur combined with postprocess
-![pie menu](https://media.giphy.com/media/U6jmdraF2YbtWJEsqx/giphy.gif)
+
+![pie menu](pieMenu.gif)
 
 
 Limitations and problems
