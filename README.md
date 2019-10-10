@@ -4,7 +4,7 @@ Compute Shader Blur for Unity
 Optimized blur for Unity using compute shaders with some examples.
 Works only for devices supporting compute shaders.
 
-![preview](preview.png)
+![preview](https://i.imgur.com/C7tJDHD.png)
 
 Static Blur 
 -------------
